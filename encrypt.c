@@ -27,6 +27,7 @@ void encryptDeck(const char* filename, const char* key) {
         unsigned char pEnc = power ^ key[pIndex];
         unsigned char sEnc = suit ^ key[sIndex];
         fprintf(tempFile, "%02X%02X ", pEnc, sEnc);
+        //Превръща число в 16-на броена с-ма в 2 символа. Ако е 1 символ първият символ става 0
         cards_count++;
     }
     
