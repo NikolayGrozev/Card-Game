@@ -17,14 +17,16 @@ void encryptDeck(const char* filename, const char* key) {
     }
     
     char power, suit;
-    int key_len = strlen(key);
+    int keyLen = strlen(key);
     int cards_count = 0;
     
     // Четем, криптираме и записваме във временния файл
     while (fscanf(file, "%c %c ", &power, &suit) == 2) {
-        unsigned char enc_p = power ^ key[0 % key_len];
-        unsigned char enc_s = suit ^ key[1 % key_len];
-        fprintf(tempFile, "%02X%02X ", enc_p, enc_s);
+        int pIndex = (cards_count * 2) % keyLen;
+        int sIndex = (cards_count * 2 + 1) % keyLen;
+        unsigned char pEnc = power ^ key[pIndex];
+        unsigned char sEnc = suit ^ key[sIndex];
+        fprintf(tempFile, "%02X%02X ", pEnc, sEnc);
         cards_count++;
     }
     
