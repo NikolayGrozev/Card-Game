@@ -1,4 +1,4 @@
-#include "functions."
+#include "functions.h"
 
 char * InputFileName() {
     int size = 4;
@@ -45,27 +45,78 @@ char * InputFileName() {
 int main()
 {
     char * filename = InputFileName();
+    const char * secretKey = "secretKey";
 
-    FILE *file = fopen(filename, "r");
+    int choice = 0;
+
+    while (1) {
+        int status = is_file_encrypted(filename);
+            
+        if (status == -1) {
+            printf("\nThe file %s did not open.\n", filename);
+            break;
+        } 
+        else if (status == -2) {
+            printf("\nThe file %d is empty or has invalid data\n", filename);
+            break; 
+        }
+
+        int cards_count = count_cards(filename, status);
+
+        if (cards_count != 52) {
+            printf("\nThe file must have 52 cards. It has %d cards.\n", cards_count);
+            break; 
+        }
+
+        printf("\n========== Menu ==========\n");
+        printf("File: %s (Cards: %d, Status: %s)\n", filename, cards_count, status == 1 ? "Encrypted" : "Not encrypted");
+        printf("--------------------------\n");
+        printf("1. encrypt the file\n");
+        printf("2. decrypt the file\n");
+        printf("3. Play game\n");
+        printf("4. Exit\n");
+        printf("==========================\n");
+        printf("Enter option: ");
+        
+        if (scanf("%d", &choice) != 1) {
+            while (getchar() != '\n');
+            printf("Please enter a valid number.\n");
+            continue;
+        }
+
+        if (choice == 1) {
+            if (status == 1) {
+                printf("\nThe file is already encrypted.\n");
+            } else {
+                printf("\nEncrypting... \n");
+                encryptDeck(filename, secretKey);
+            }
+        } 
+        else if (choice == 2) {
+            if (status == 0) {
+                printf("\nThe file is not encrypted.\n");
+            } else {
+                printf("\nDecrypting... \n");
+                decryptDeck(filename, secretKey);
+            }
+        } 
+        else if (choice == 3) {
+            if (status == 0) {
+                printf("\nThe file must be encrypted to start the game\n");
+            } else {
+                printf("\nStarting game... \n");
+                //Тук пиши играта!
+            }
+        } 
+        else if (choice == 4) {
+            printf("\nExiting... \n");
+            break;
+        } 
+        else {
+            printf("\nInvalid option. Choose from 1 to 4.\n");
+        }
+    }
+
     free(filename);
-    if (!file) {
-        printf("Error opening file %s\n", file);
-        return 0;
-    }
-
-    printf("\nOpened File sucessfully ");
-
-
-    Card memory_array[52];
-    int count = 0;
-
-    while (decrypt_single_card(file, "secretKey", count, &memory_array[count])) {
-        count++;
-    }
-
-    printf("%d\n", count);
-
-    fclose(file);
-
     return 0;
 }

@@ -19,7 +19,6 @@ void encryptDeck(const char* filename, const char* key) {
     int keyLen = strlen(key);
     int cards_count = 0;
     
-    // Четем, криптираме и записваме във временния файл
     while (fscanf(file, "%c %c ", &power, &suit) == 2) {
         int pIndex = (cards_count * 2) % keyLen;
         int sIndex = (cards_count * 2 + 1) % keyLen;
@@ -33,7 +32,6 @@ void encryptDeck(const char* filename, const char* key) {
     fclose(file);
     fclose(tempFile);
     
-    // Заместваме оригиналния файл
     remove(filename);
     rename(temp_filename, filename);
     
@@ -55,12 +53,10 @@ void decryptDeck(const char* filename, const char* key) {
         return;
     }
     
-    Card currentCard; // Създаваме структура, в която ще записваме декриптираната карта
+    Card currentCard;
     int cards_count = 0;
     
-    // Подаваме файла, ключа, текущия брой (като индекс) и адреса на currentCard
     while (decrypt_single_card(file, key, cards_count, &currentCard)) {
-        // Записваме декриптираната сила и боя във временния файл
         fprintf(tempFile, "%c %c ", currentCard.power, currentCard.suit);
         cards_count++;
     }
