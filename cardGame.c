@@ -1,47 +1,5 @@
 #include "functions.h"
 
-char * InputFileName() {
-    int size = 4;
-    char * c = (char *)calloc(size, sizeof(char));
-    
-    if (c == NULL) {
-        printf("\nError in allocating memory");
-        exit(1);
-    }
-
-    printf("\nEnter file name: ");
-
-    int count = 0;
-    int ch; 
-
-    while ((ch = getchar()) != '\n' && ch != EOF) {
-        
-        if (count == size - 1) {
-            size *= 2;
-            
-            char * temp = (char *)realloc(c, size * sizeof(char));
-            if (temp == NULL) {
-                free(c);
-                printf("\nError in reallocating memory");
-                exit(1);
-            }
-            c = temp;
-        }
-        
-        c[count++] = (char)ch;
-    }
-
-    c[count] = '\0';
-
-    c = (char *)realloc(c, (count + 1) * sizeof(char));
-    if (c == NULL) {
-        printf("\nError in reallocating memory");
-        exit(1);
-    }
-
-    return c;
-}
-
 int main()
 {
     char * filename = InputFileName();
@@ -55,9 +13,8 @@ int main()
         if (status == -1) {
             printf("\nThe file %s did not open.\n", filename);
             break;
-        } 
-        else if (status == -2) {
-            printf("\nThe file %d is empty or has invalid data\n", filename);
+        } else if (status == -2) {
+            printf("\nThe file %s is empty or has invalid data\n", filename);
             break; 
         }
 
@@ -76,7 +33,7 @@ int main()
         printf("3. Play game\n");
         printf("4. Exit\n");
         printf("==========================\n");
-        printf("Enter option: ");
+        printf("Enter option(1-4): ");
         
         if (scanf("%d", &choice) != 1) {
             while (getchar() != '\n');
@@ -105,7 +62,55 @@ int main()
                 printf("\nThe file must be encrypted to start the game\n");
             } else {
                 printf("\nStarting game... \n");
-                //Тук пиши играта!
+                
+                FILE * gameFile = fopen(filename, "r");
+                if(!gameFile){
+                    printf("\nError opening file for the game.\n");
+                    continue;
+                }
+
+                Card playerCards[4][13];
+                int cardsAmmountPerPlayer = 0;
+                int cardsInGame = 0;
+
+                int winnersQueue[4] = {0, 0, 0, 0};
+                int winningValues[4] = {0, 0, 0, 0}; 
+                char noWinners = 1;
+                
+                for(int i = 0; i < 13; i++){
+                    for(int j = 0; j < 4; j++){
+                        decrypt_single_card(gameFile, secretKey, cardsInGame, &playerCards[j][cardsAmmountPerPlayer]);
+                        cardsInGame++;
+                    }
+                    cardsAmmountPerPlayer++;
+                    
+                    for(int j = 0; j < 4; j++){
+                        int winVal = hasWon(cardsAmmountPerPlayer, playerCards[j]);
+                        if(winVal > 0){
+                            winnersQueue[j] = 1;
+                            winningValues[j] = winVal;
+                            noWinners = 0;
+                        }
+                    }
+                    if(!noWinners){
+                        break; 
+                    }
+                }
+
+                fclose(gameFile);
+
+                int winnerIndex = 0;
+
+                if(noWinners){
+                    
+                    winnerIndex = getFinalWinner_ByHighCard(cardsAmmountPerPlayer, playerCards);
+                } else {
+                    winnerIndex = getFinalWinner_ByComparrison(winnersQueue, winningValues, cardsAmmountPerPlayer, playerCards);
+                }
+
+                printf("\nPlayer %d wins: ", winnerIndex + 1);
+                printPlayer(cardsAmmountPerPlayer, playerCards[winnerIndex]);
+                printf("\n");
             }
         } 
         else if (choice == 4) {
