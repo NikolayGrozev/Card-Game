@@ -265,7 +265,7 @@ void decryptDeck(const char* filename, const char* key) {
     remove(filename);
     rename(temp_filename, filename);
     
-    printf("Файлът '%s' беше успешно декриптиран (%d карти).\n", filename, cards_count);
+    printf("The file %s was decrypted (%d cards).\n", filename, cards_count);
 }
 
 int decrypt_single_card(FILE *file, const char *key, int cardIndex, Card *drawnCard) {
